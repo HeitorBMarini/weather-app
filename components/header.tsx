@@ -1,6 +1,7 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import Image from "next/image";
 import logo from "@/components/imgs/logo.png";
+import CitySearch from "./city-search";
 
 export default function Header() {
   return (

@@ -14,6 +14,10 @@ import {
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import CurrentWeather from "../currentweather";
 import HourlyTemperature from "../hourley-temperature";
+import { WeatherDetails } from "../weather-details";
+import WeatherForecast from "../weather-forecast";
+
+import FavoriteCities from "../favorite-cities";
 
 export default function WeatherDashboard() {
   const {
@@ -72,6 +76,8 @@ export default function WeatherDashboard() {
 
   return (
     <div className="container items-center mx-auto p-4">
+      <FavoriteCities />
+
       <div className="flex justify-between">
         <h2 className="mb-2 font-bold text-xl tracking-tight">Minha Localização</h2>
         <Button
@@ -93,6 +99,12 @@ export default function WeatherDashboard() {
         </div>
         <div>
           <HourlyTemperature data={forecastQuery.data} />
+        </div>
+        <div>
+          <WeatherDetails data={weatherQuery.data} />
+        </div>
+        <div>
+          <WeatherForecast data={forecastQuery.data} />
         </div>
       </div>
     </div>

@@ -26,7 +26,8 @@ export default function CurrentWeather({
   } = data;
 
     // Format temperature
-  const formatTemp = (temp: number) => `${Math.round(temp)}°`;
+const formatTemp = (temp?: number) => 
+  typeof temp === "number" ? `${Math.round(temp)}°` : "--";
 
   return (
  <Card className="overflow-hidden">
