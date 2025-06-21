@@ -2,7 +2,6 @@
 
 Aplicação web que exibe informações meteorológicas com base na **sua localização atual**, utilizando a [API do OpenWeatherMap](https://openweathermap.org/api).  
 
-Você pode buscar cidades, marcar favoritas e visualizar detalhes como temperatura atual, previsão por hora e próximos dias.
 
 ## 🔗 Acesse o projeto online
 👉 [https://weather-app-ten-virid-83.vercel.app](https://weather-app-ten-virid-83.vercel.app)
