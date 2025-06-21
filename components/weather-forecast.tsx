@@ -68,7 +68,7 @@ export default function WeatherForecast({ data }: WeatherForecastProps) {
           {nextDays.map((day) => (
             <div
               key={day.date}
-              className="grid grid-cols-3 items-center gap-4 rounded-lg border p-4"
+              className="grid md:grid-cols-3 sm:grid-cols-1  sm:justify-center items-center gap-4 rounded-lg border p-4"
             >
               <div>
                 <p className="font-medium">
