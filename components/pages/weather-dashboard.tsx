@@ -55,22 +55,27 @@ export default function WeatherDashboard() {
   const locationName = locationQuery.data?.[0];
 
   if (weatherQuery.error || forecastQuery.error) {
-    return(
+    return (
       <Alert variant="destructive">
         <AlertCircleIcon />
         <AlertTitle>Erro </AlertTitle>
         <AlertDescription>
           <p>Falha na leitura, tente novamente</p>
-          <Button onClick={handleRefresh} variant={"outline"} size="sm" className="mt-2">
+          <Button
+            onClick={handleRefresh}
+            variant={"outline"}
+            size="sm"
+            className="mt-2"
+          >
             <MapPin className="h-4 w-4 mr-2" />
             Recarregar
           </Button>
         </AlertDescription>
       </Alert>
-    )
+    );
   }
 
-  if(!weatherQuery.data || !forecastQuery.data || !locationQuery.data) {
+  if (!weatherQuery.data || !forecastQuery.data || !locationQuery.data) {
     return <WeatherSkeleton />;
   }
 
@@ -79,7 +84,9 @@ export default function WeatherDashboard() {
       <FavoriteCities />
 
       <div className="flex justify-between">
-        <h2 className="mb-2 font-bold text-xl tracking-tight">Minha Localização</h2>
+        <h2 className="mb-2 font-bold text-xl tracking-tight">
+          Minha Localização
+        </h2>
         <Button
           variant={"outline"}
           size={"icon"}
@@ -87,25 +94,17 @@ export default function WeatherDashboard() {
           disabled={weatherQuery.isFetching || forecastQuery.isFetching}
           className="mb-4"
         >
-          <RefreshCcw className={`h-4 w-4 ${weatherQuery.isFetching ? "animate-spin" : ""} `} />
+          <RefreshCcw
+            className={`h-4 w-4 ${weatherQuery.isFetching ? "animate-spin" : ""} `}
+          />
         </Button>
       </div>
 
       <div className="lg:grid-cols-2 sm:grid-cols-1 grid gap-4">
-        <div>
-          <CurrentWeather
-            data={weatherQuery.data} locationName={locationName}
-            />
-        </div>
-        <div>
-          <HourlyTemperature data={forecastQuery.data} />
-        </div>
-        <div>
-          <WeatherDetails data={weatherQuery.data} />
-        </div>
-        <div>
-          <WeatherForecast data={forecastQuery.data} />
-        </div>
+        <WeatherForecast data={forecastQuery.data} />
+        <HourlyTemperature data={forecastQuery.data} />
+        <CurrentWeather data={weatherQuery.data} locationName={locationName} />
+        <WeatherDetails data={weatherQuery.data} />
       </div>
     </div>
   );

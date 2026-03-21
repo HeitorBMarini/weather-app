@@ -10,7 +10,6 @@ import WeatherForecast from "../weather-forecast";
 import FavoriteButton from "../favorite-button";
 
 
-// 👉 tipagem dos parâmetros e busca
 interface CityPageProps {
   params: { name: string };
   searchParams: { lat?: string; lon?: string };

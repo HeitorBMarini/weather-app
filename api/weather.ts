@@ -14,7 +14,6 @@ class WeatherAPI {
       throw new Error("API key is missing. Please check your environment variables.");
     }
 
-    // Garantir que todos os valores sejam string
     const processedParams: Record<string, string> = {};
     for (const key in params) {
       processedParams[key] = String(params[key]);
