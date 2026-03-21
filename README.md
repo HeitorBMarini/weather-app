@@ -4,13 +4,13 @@ Aplicação web que exibe informações meteorológicas com base na **sua locali
 
 
 ## 🔗 Acesse o projeto online
-👉 [https://weather-app-ten-virid-83.vercel.app](https://weather-app-ten-virid-83.vercel.app)
+👉 [Project Link](https://weather-app-git-dev-heitorbmarinis-projects.vercel.app/)
 
 ---
 
 ## 🛠️ Tecnologias utilizadas
 
-- **Next.js 15**
+- **Next.js 16**
 - **TypeScript**
 - **Tailwind CSS**
 - **ShadCN UI**
