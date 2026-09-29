@@ -1,84 +1,72 @@
-import { ForecastData } from "@/api/types";
-import { TrendingUp } from "lucide-react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "./ui/card";
-import {
-  LineChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Line,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { format } from "date-fns";
+"use client";
 
-interface HourlyTemperatureProps {
-  data: ForecastData;
+import type { ForecastData } from "@/api/types";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Area, Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { formatCityTime } from "@/lib/weather";
+
+type Point = { time: string; temp: number; feels: number; rain: number };
+
+function ChartTooltip({ active, payload }: { active?: boolean; payload?: { payload: Point }[] }) {
+  if (!active || !payload?.length) return null;
+  const p = payload[0].payload;
+  return (
+    <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+      <p className="mb-1 font-semibold">{p.time}</p>
+      <p className="text-sky-500">Temperatura: {Math.round(p.temp)}°C</p>
+      <p className="text-amber-500">Sensação: {Math.round(p.feels)}°C</p>
+      <p className="text-muted-foreground">Chance de chuva: {p.rain}%</p>
+    </div>
+  );
 }
 
-interface ChartData {
-  time: string;
-  temp: number;
-  feels_like: number;
-}
-
-export default function HourlyTemperature({ data }: HourlyTemperatureProps) {
-  // Transformando a lista da API para dados do gráfico
-  const chartData: ChartData[] = data.list.slice(0, 8).map((item) => ({
-    time: format(new Date(item.dt * 1000), "HH:mm"),
+export default function HourlyTemperature({ data }: { data: ForecastData }) {
+  const tz = data.city.timezone;
+  const points: Point[] = data.list.slice(0, 9).map((item) => ({
+    time: formatCityTime(item.dt, tz, "HH:mm"),
     temp: item.main.temp,
-    feels_like: item.main.feels_like,
+    feels: item.main.feels_like,
+    rain: Math.round((item.pop ?? 0) * 100),
   }));
+
+  const maxRain = Math.max(...points.map((p) => p.rain));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Temperatura nas próximas horas</CardTitle>
+        <CardTitle>Próximas 24 horas</CardTitle>
+        <CardDescription>
+          Temperatura, sensação térmica e chance de chuva a cada 3 horas
+          {maxRain >= 40 ? ` · até ${maxRain}% de chance de chuva` : ""}
+        </CardDescription>
       </CardHeader>
-
       <CardContent>
-        <div className="w-full h-64">
+        <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ left: 10, right: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="time" />
-              <YAxis domain={['auto', 'auto']} />
-              <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="temp"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                dot={false}
-                name="Temperatura"
-              />
-              <Line
-                type="monotone"
-                dataKey="feels_like"
-                stroke="#f59e0b"
-                strokeWidth={2}
-                dot={false}
-                name="Sensação Térmica"
-              />
-            </LineChart>
+            <ComposedChart data={points} margin={{ left: -12, right: 4, top: 8 }}>
+              <defs>
+                <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.25} />
+              <XAxis dataKey="time" tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis yAxisId="t" domain={["dataMin - 2", "dataMax + 2"]} tickFormatter={(v) => `${Math.round(v)}°`} tickLine={false} axisLine={false} fontSize={12} />
+              <YAxis yAxisId="r" orientation="right" domain={[0, 100]} hide />
+              <Tooltip content={<ChartTooltip />} />
+              <Bar yAxisId="r" dataKey="rain" fill="#60a5fa" fillOpacity={0.25} radius={[4, 4, 0, 0]} barSize={18} name="Chuva" />
+              <Area yAxisId="t" type="monotone" dataKey="temp" stroke="#0ea5e9" strokeWidth={2.5} fill="url(#tempFill)" name="Temperatura" />
+              <Line yAxisId="t" type="monotone" dataKey="feels" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 4" dot={false} name="Sensação" />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
+        <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-4 rounded bg-sky-500" /> Temperatura</span>
+          <span className="flex items-center gap-1.5"><span className="h-0.5 w-4 rounded border-t-2 border-dashed border-amber-500" /> Sensação</span>
+          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-blue-400/30" /> Chance de chuva</span>
+        </div>
       </CardContent>
-
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 leading-none font-medium">
-          Atualizado agora <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="text-muted-foreground leading-none">
-          Mostrando previsão das próximas 24 horas
-        </div>
-      </CardFooter>
     </Card>
   );
 }

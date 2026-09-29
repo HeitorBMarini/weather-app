@@ -1,24 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
-import {
-  Search,
-  Loader2,
-  Clock,
-  Star,
-  XCircle,
-} from "lucide-react";
-
+import { Clock, Loader2, Search, Star, XCircle } from "lucide-react";
 import { useLocationSearch } from "@/hooks/use-weather";
 import { useSearchHistory } from "@/hooks/use-search-history";
 import { useFavorites } from "@/hooks/use-favorite";
-
+import { cityHref } from "@/lib/city-url";
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -29,144 +18,121 @@ import {
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 
+type Place = { lat: number; lon: number; name: string; country: string; state?: string };
+
 export default function CitySearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
   const router = useRouter();
 
-  const { data: locations, isLoading } = useLocationSearch(query);
+  // Espera o usuário parar de digitar antes de consultar a API.
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // Atalho Ctrl/Cmd + K
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const { data: locations, isFetching } = useLocationSearch(debounced);
   const { favorites } = useFavorites();
   const { history, clearHistory, addToHistory } = useSearchHistory();
 
-  const handleSelect = (cityData: string) => {
-    const [latStr, lonStr, name, country] = cityData.split("|");
-
-    const lat = parseFloat(latStr);
-    const lon = parseFloat(lonStr);
-
-    if (!lat || !lon || !name || !country) return;
-
-    addToHistory.mutate({
-      query,
-      name,
-      lat,
-      lon,
-      country,
-    });
-
+  const go = (place: Place) => {
+    addToHistory({ name: place.name, lat: place.lat, lon: place.lon, country: place.country, state: place.state });
     setOpen(false);
-    router.push(`/city/${name}?lat=${lat}&lon=${lon}`);
+    setQuery("");
+    router.push(cityHref(place));
   };
+
+  const label = (p: Place) => [p.state, p.country].filter(Boolean).join(", ");
+  const searching = debounced.trim().length >= 3;
 
   return (
     <>
       <Button
         variant="outline"
-        className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+        className="w-10 justify-center px-0 text-sm text-muted-foreground sm:w-56 sm:justify-start sm:px-3"
         onClick={() => setOpen(true)}
+        aria-label="Buscar cidade"
       >
-        <Search className="mr-2 h-4 w-4" />
-        Buscar cidade...
+        <Search className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">Buscar cidade…</span>
+        <kbd className="ml-auto hidden rounded border bg-muted px-1.5 font-mono text-[10px] lg:inline">Ctrl K</kbd>
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command>
-          <CommandInput
-            placeholder="Digite o nome da cidade..."
-            value={query}
-            onValueChange={setQuery}
-          />
+      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
+        <CommandInput placeholder="Digite o nome da cidade…" value={query} onValueChange={setQuery} />
+        <CommandList>
+          {searching && isFetching && (
+            <div className="flex items-center justify-center gap-2 p-4 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Buscando…
+            </div>
+          )}
+          {searching && !isFetching && <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>}
 
-          <CommandList>
-            {query.length > 2 && !isLoading && (
-              <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
-            )}
+          {searching && !!locations?.length && (
+            <CommandGroup heading="Resultados">
+              {locations.map((loc) => (
+                <CommandItem key={`${loc.lat}-${loc.lon}`} value={`${loc.lat}-${loc.lon}`} onSelect={() => go(loc)}>
+                  <Search className="mr-2 h-4 w-4" />
+                  <span>{loc.name}</span>
+                  <span className="ml-1 text-sm text-muted-foreground">{label(loc)}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
 
-            {/* Favoritos */}
-            {favorites.length > 0 && (
-              <CommandGroup heading="Favoritos">
-                {favorites.map((city) => (
-                  <CommandItem
-                    key={city.id}
-                    value={`${city.lat}|${city.lon}|${city.name}|${city.country}`}
-                    onSelect={handleSelect}
-                  >
-                    <Star className="mr-2 h-4 w-4 text-yellow-500" />
-                    <span>{city.name}</span>
-                    {city.state && (
-                      <span className="text-sm text-muted-foreground">, {city.state}</span>
-                    )}
-                    <span className="text-sm text-muted-foreground">, {city.country}</span>
+          {!searching && favorites.length > 0 && (
+            <CommandGroup heading="Favoritos">
+              {favorites.map((city) => (
+                <CommandItem key={city.id} value={`fav-${city.id}`} onSelect={() => go(city)}>
+                  <Star className="mr-2 h-4 w-4 text-amber-500" />
+                  <span>{city.name}</span>
+                  <span className="ml-1 text-sm text-muted-foreground">{label(city)}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {!searching && history.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup
+                heading={
+                  <span className="flex items-center justify-between">
+                    Buscas recentes
+                    <button onClick={clearHistory} className="inline-flex items-center gap-1 text-xs hover:text-foreground">
+                      <XCircle className="h-3.5 w-3.5" /> Limpar
+                    </button>
+                  </span>
+                }
+              >
+                {history.map((item) => (
+                  <CommandItem key={item.id} value={`hist-${item.id}`} onSelect={() => go(item)}>
+                    <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <span>{item.name}</span>
+                    <span className="ml-1 text-sm text-muted-foreground">{label(item)}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>
-            )}
+            </>
+          )}
 
-            {/* Histórico de busca */}
-            {history.length > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <div className="flex items-center justify-between px-2 my-2">
-                    <p className="text-xs text-muted-foreground">Buscas recentes</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => clearHistory.mutate()}
-                    >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Limpar
-                    </Button>
-                  </div>
-
-                  {history.map((item) => (
-                    <CommandItem
-                      key={item.id}
-                      value={`${item.lat}|${item.lon}|${item.name}|${item.country}`}
-                      onSelect={handleSelect}
-                    >
-                      <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span>{item.name}</span>
-                      {item.state && (
-                        <span className="text-sm text-muted-foreground">, {item.state}</span>
-                      )}
-                      <span className="text-sm text-muted-foreground">, {item.country}</span>
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {format(new Date(item.searchedAt), "dd/MM - HH:mm", { locale: ptBR })}
-                      </span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
-            )}
-
-            {/* Sugestões da busca */}
-            <CommandSeparator />
-            {locations && locations.length > 0 && (
-              <CommandGroup heading="Sugestões">
-                {isLoading && (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </div>
-                )}
-                {locations.map((location) => (
-                  <CommandItem
-                    key={`${location.lat}-${location.lon}`}
-                    value={`${location.lat}|${location.lon}|${location.name}|${location.country}`}
-                    onSelect={handleSelect}
-                  >
-                    <Search className="mr-2 h-4 w-4" />
-                    <span>{location.name}</span>
-                    {location.state && (
-                      <span className="text-sm text-muted-foreground">, {location.state}</span>
-                    )}
-                    <span className="text-sm text-muted-foreground">, {location.country}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
+          {!searching && !favorites.length && !history.length && (
+            <p className="p-4 text-center text-sm text-muted-foreground">Digite pelo menos 3 letras para buscar.</p>
+          )}
+        </CommandList>
       </CommandDialog>
     </>
   );

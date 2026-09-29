@@ -1,80 +1,34 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Coordinates } from "@/api/types";
 
-interface GeolocationState {
-  coordinates: Coordinates | null;
-  error: string | null;
-  isLoading: boolean;
-}
+export const FALLBACK_LOCATION = { lat: -23.5505, lon: -46.6333, name: "São Paulo" };
 
-export function useGeolocation() {
-  const [locationData, setLocationData] = useState<GeolocationState>({
-    coordinates: null,
-    error: null,
-    isLoading: true,
-  });
+type Status = "loading" | "granted" | "denied" | "unsupported";
 
-  const getLocation = () => {
-    setLocationData((prev) => ({ ...prev, isLoading: true, error: null }));
+/** Pede a localização do navegador; se falhar, o painel usa FALLBACK_LOCATION em vez de travar numa tela de erro. */
+export function useGeolocation(enabled = true) {
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const [status, setStatus] = useState<Status>("loading");
 
-    if (!navigator.geolocation) {
-      setLocationData({
-        coordinates: null,
-        error: "Geolocation is not supported by your browser",
-        isLoading: false,
-      });
+  const getLocation = useCallback(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setStatus("unsupported");
       return;
     }
-
+    setStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocationData({
-          coordinates: {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          },
-          error: null,
-          isLoading: false,
-        });
+        setCoordinates({ lat: position.coords.latitude, lon: position.coords.longitude });
+        setStatus("granted");
       },
-      (error) => {
-        let errorMessage: string;
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage =
-              "Location permission denied. Please enable location access.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information is unavailable.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out.";
-            break;
-          default:
-            errorMessage = "An unknown error occurred.";
-        }
-
-        setLocationData({
-          coordinates: null,
-          error: errorMessage,
-          isLoading: false,
-        });
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      }
+      () => setStatus("denied"),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 10 * 60 * 1000 },
     );
-  };
-
-  useEffect(() => {
-    getLocation();
   }, []);
 
-  return {
-    ...locationData,
-    getLocation, 
-  };
+  useEffect(() => {
+    if (enabled) getLocation();
+  }, [enabled, getLocation]);
+
+  return { coordinates, status, getLocation };
 }

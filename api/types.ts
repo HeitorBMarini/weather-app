@@ -30,15 +30,20 @@ export interface WeatherData {
     pressure: number;
     humidity: number;
   };
+  visibility?: number;
+  clouds?: { all: number };
   wind: {
     speed: number;
     deg: number;
+    gust?: number;
   };
   sys: {
     sunrise: number;
     sunset: number;
     country: string;
   };
+  /** Deslocamento do fuso da cidade em segundos, em relação ao UTC. */
+  timezone: number;
   name: string;
   dt: number;
 }
@@ -49,6 +54,8 @@ export interface ForecastData {
     main: WeatherData["main"];
     weather: WeatherData["weather"];
     wind: WeatherData["wind"];
+    /** Probabilidade de precipitação, de 0 a 1. */
+    pop?: number;
     dt_txt: string;
   }>;
   city: {
@@ -56,5 +63,6 @@ export interface ForecastData {
     country: string;
     sunrise: number;
     sunset: number;
+    timezone: number;
   };
 }

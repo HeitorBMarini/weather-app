@@ -1,82 +1,48 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useWeatherQuery } from "@/hooks/use-weather";
-import { X, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import { useWeatherQuery } from "@/hooks/use-weather";
+import type { FavoriteCity } from "@/hooks/use-favorite";
+import { cityHref } from "@/lib/city-url";
+import { capitalize } from "@/lib/weather";
 
-interface FavoriteCityTabletProps {
-  id: string;
-  name: string;
-  lat: number;
-  lon: number;
-  onRemove: (id: string) => void;
-}
-
-export function FavoriteCityTablet({
-  id,
-  name,
-  lat,
-  lon,
-  onRemove,
-}: FavoriteCityTabletProps) {
-  const router = useRouter();
-  const { data: weather, isLoading } = useWeatherQuery({ lat, lon });
-
-  const handleClick = () => {
-    router.push(`/city/${name}?lat=${lat}&lon=${lon}`);
-  };
+export function FavoriteCityTablet({ city, onRemove }: { city: FavoriteCity; onRemove: () => void }) {
+  const { data: weather, isLoading } = useWeatherQuery({ lat: city.lat, lon: city.lon });
 
   return (
-    <div
-      onClick={handleClick}
-      className="relative flex min-w-[250px] cursor-pointer items-center gap-3 rounded-lg border bg-card p-4 pr-8 shadow-sm transition-all hover:shadow-md"
-      role="button"
-      tabIndex={0}
-    >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-1 top-1 h-6 w-6 rounded-full p-0 hover:text-destructive-foreground group-hover:opacity-100"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove(id);
-          toast.error(`Removido ${name} dos favoritos`);
-        }}
+    <div className="relative min-w-[230px]">
+      <Link
+        href={cityHref(city)}
+        className="flex items-center gap-3 rounded-xl border bg-card p-3 pr-9 shadow-sm transition hover:shadow-md"
       >
-        <X className="h-4 w-4" />
-      </Button>
-
-      {isLoading ? (
-        <div className="flex h-8 items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin" />
-        </div>
-      ) : weather ? (
-        <>
-          <div className="flex items-center gap-2">
-            <img
-              src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`}
-              alt={weather.weather[0].description}
-              className="h-8 w-8"
-            />
-            <div>
-              <p className="font-medium">{name}</p>
-              <p className="text-xs text-muted-foreground">
-                {weather.sys.country}
-              </p>
+        {isLoading || !weather ? (
+          <div className="flex h-10 w-full items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> {city.name}
+          </div>
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`} alt="" className="h-10 w-10" />
+            <div className="min-w-0">
+              <p className="truncate font-medium">{city.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{capitalize(weather.weather[0].description)}</p>
             </div>
-          </div>
-          <div className="ml-auto text-right">
-            <p className="text-xl font-bold">
-              {Math.round(weather.main.temp)}°
-            </p>
-            <p className="text-xs capitalize text-muted-foreground">
-              {weather.weather[0].description}
-            </p>
-          </div>
-        </>
-      ) : null}
+            <p className="ml-auto text-xl font-bold tabular-nums">{Math.round(weather.main.temp)}°</p>
+          </>
+        )}
+      </Link>
+      <button
+        onClick={() => {
+          onRemove();
+          toast(`${city.name} saiu dos favoritos`);
+        }}
+        aria-label={`Remover ${city.name} dos favoritos`}
+        className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }

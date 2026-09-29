@@ -6,24 +6,19 @@ import { FavoriteCityTablet } from "./favorite-city-tablet";
 
 export default function FavoriteCities() {
   const { favorites, removeFavorite } = useFavorites();
-
   if (!favorites.length) return null;
 
   return (
-    <>
-      <h1 className="text-xl font-bold tracking-tight">Favoritos</h1>
-      <ScrollArea className="w-full pb-4">
-        <div className="flex gap-4">
+    <section aria-label="Cidades favoritas">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Favoritas</h2>
+      <ScrollArea className="w-full pb-3">
+        <div className="flex gap-3">
           {favorites.map((city) => (
-            <FavoriteCityTablet
-              key={city.id}
-              {...city}
-              onRemove={() => removeFavorite.mutate(city.id)}
-            />
+            <FavoriteCityTablet key={city.id} city={city} onRemove={() => removeFavorite(city.id)} />
           ))}
         </div>
-        <ScrollBar orientation="horizontal" className="mt-2" />
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
-    </>
+    </section>
   );
 }
