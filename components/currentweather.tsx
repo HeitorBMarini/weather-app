@@ -58,13 +58,13 @@ export default function CurrentWeather({ data, name, region }: CurrentWeatherPro
             </div>
           </div>
 
-          <dl className="mt-6 grid max-w-md grid-cols-3 gap-3">
+          <dl className="mt-6 grid max-w-md grid-cols-3 gap-2 sm:gap-3">
             {stats.map((s) => (
-              <div key={s.label} className="rounded-xl bg-white/15 px-3 py-2.5 backdrop-blur-sm">
-                <dt className="flex items-center gap-1.5 text-xs text-white/80">
-                  <s.icon className="h-3.5 w-3.5" /> {s.label}
+              <div key={s.label} className="min-w-0 rounded-xl bg-white/15 px-2.5 py-2.5 backdrop-blur-sm sm:px-3">
+                <dt className="flex items-center gap-1 truncate text-[11px] text-white/80 sm:gap-1.5 sm:text-xs">
+                  <s.icon className="h-3.5 w-3.5 shrink-0" /> {s.label}
                 </dt>
-                <dd className="mt-0.5 font-semibold">{s.value}</dd>
+                <dd className="mt-0.5 whitespace-nowrap text-sm font-semibold sm:text-base">{s.value}</dd>
               </div>
             ))}
           </dl>

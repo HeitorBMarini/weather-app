@@ -85,14 +85,15 @@ export default function WeatherDashboard() {
       <FavoriteCities />
 
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-bold tracking-tight">
+        <h1 className="min-w-0 text-xl font-bold tracking-tight">
           {source === "city" ? "Cidade pesquisada" : source === "gps" ? "Minha localização" : "Clima agora"}
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {source === "city" && (
             <Button asChild variant="ghost" size="sm">
-              <Link href="/">
-                <LocateFixed className="mr-2 h-4 w-4" /> Minha localização
+              <Link href="/" aria-label="Voltar para minha localização">
+                <LocateFixed className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Minha localização</span>
               </Link>
             </Button>
           )}
