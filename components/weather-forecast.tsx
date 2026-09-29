@@ -1,4 +1,4 @@
-import type { ForecastData } from "@/api/types";
+import type { ForecastData } from "@/lib/api/types";
 import { Droplets } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { capitalize, formatCityTime, formatTemp } from "@/lib/weather";

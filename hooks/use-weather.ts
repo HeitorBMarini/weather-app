@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { weatherAPI } from "@/api/weather";
-import type { Coordinates } from "@/api/types";
+import { weatherAPI } from "@/lib/api/weather";
+import type { Coordinates } from "@/lib/api/types";
 
 const round = (c: Coordinates) => ({ lat: Number(c.lat.toFixed(3)), lon: Number(c.lon.toFixed(3)) });
 

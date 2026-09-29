@@ -2,7 +2,7 @@
 
 import { Star } from "lucide-react";
 import { toast } from "sonner";
-import type { WeatherData } from "@/api/types";
+import type { WeatherData } from "@/lib/api/types";
 import { favoriteId, useFavorites } from "@/hooks/use-favorite";
 
 export default function FavoriteButton({ data, name }: { data: WeatherData; name: string }) {

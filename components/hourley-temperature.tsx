@@ -1,6 +1,6 @@
 "use client";
 
-import type { ForecastData } from "@/api/types";
+import type { ForecastData } from "@/lib/api/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Area, Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatCityTime } from "@/lib/weather";

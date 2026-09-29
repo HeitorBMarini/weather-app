@@ -1,4 +1,4 @@
-import type { WeatherData } from "@/api/types";
+import type { WeatherData } from "@/lib/api/types";
 import { ArrowDown, ArrowUp, Cloud, Droplets, Wind } from "lucide-react";
 import FavoriteButton from "./favorite-button";
 import { capitalize, conditionTheme, formatCityTime, formatTemp, kmh } from "@/lib/weather";

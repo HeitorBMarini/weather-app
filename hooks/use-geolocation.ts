@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Coordinates } from "@/api/types";
+import type { Coordinates } from "@/lib/api/types";
 
 export const FALLBACK_LOCATION = { lat: -23.5505, lon: -46.6333, name: "São Paulo" };
 

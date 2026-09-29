@@ -1,4 +1,4 @@
-import type { WeatherData } from "@/api/types";
+import type { WeatherData } from "@/lib/api/types";
 import { Compass, Eye, Gauge, Sunrise, Sunset, Wind } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { formatCityTime, kmh, windDirection } from "@/lib/weather";
