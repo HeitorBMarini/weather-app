@@ -3,7 +3,7 @@
 Previsão do tempo para a **sua localização** ou **qualquer cidade**, com dados da [OpenWeather](https://openweathermap.org/api).
 
 ## 🔗 Acesse online
-👉 https://weather-app-git-dev-heitorbmarinis-projects.vercel.app/
+👉 https://weather-hbm.vercel.app
 
 ## ✨ Funcionalidades
 
