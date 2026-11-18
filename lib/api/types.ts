@@ -48,16 +48,24 @@ export interface WeatherData {
   dt: number;
 }
 
+export interface ForecastItem {
+  dt: number;
+  main: WeatherData["main"] & { dew_point?: number };
+  weather: WeatherData["weather"];
+  wind: WeatherData["wind"];
+  clouds?: { all: number };
+  visibility?: number;
+  /** Probabilidade de precipitação, de 0 a 1. */
+  pop?: number;
+  /** Volume de chuva nas últimas 3 horas, em mm. */
+  rain?: { "3h"?: number };
+  snow?: { "3h"?: number };
+  sys?: { pod: "d" | "n" };
+  dt_txt: string;
+}
+
 export interface ForecastData {
-  list: Array<{
-    dt: number;
-    main: WeatherData["main"];
-    weather: WeatherData["weather"];
-    wind: WeatherData["wind"];
-    /** Probabilidade de precipitação, de 0 a 1. */
-    pop?: number;
-    dt_txt: string;
-  }>;
+  list: ForecastItem[];
   city: {
     name: string;
     country: string;

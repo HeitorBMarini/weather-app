@@ -9,7 +9,8 @@ Previsão do tempo para a **sua localização** ou **qualquer cidade**, com dado
 
 - **Clima agora** com fundo que muda conforme a condição e se é dia ou noite
 - **Próximas 24 horas**: temperatura, sensação térmica e chance de chuva
-- **Próximos 5 dias** com barra de amplitude de temperatura
+- **Próximos 5 dias** com barra de amplitude de temperatura; ao tocar em um dia abre a previsão completa dele (gráfico, hora a hora, chuva em mm, vento, umidade, pressão e nuvens), com navegação entre os dias
+- **Detalhes de agora** em blocos do mesmo tamanho, com interpretação de cada valor (ponto de orvalho, duração do dia, nível de umidade, pressão e visibilidade)
 - **Busca de cidades** (Ctrl + K), com histórico e favoritos; a cidade fica na URL para compartilhar
 - **Horários no fuso da cidade** consultada (nascer e pôr do sol, previsão)
 - Sem permissão de localização, abre em São Paulo em vez de travar numa tela de erro

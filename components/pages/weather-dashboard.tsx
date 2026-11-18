@@ -111,7 +111,7 @@ export default function WeatherDashboard() {
 
       <CurrentWeather data={weatherQuery.data} name={name} region={region} />
       <HourlyTemperature data={forecastQuery.data} />
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="grid items-stretch gap-6 lg:grid-cols-2">
         <WeatherForecast data={forecastQuery.data} />
         <WeatherDetails data={weatherQuery.data} />
       </div>
