@@ -44,7 +44,7 @@ export default function CitySearch() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const { data: locations, isFetching } = useLocationSearch(debounced);
+  const { data: locations, isFetching, error } = useLocationSearch(debounced);
   const { favorites } = useFavorites();
   const { history, clearHistory, addToHistory } = useSearchHistory();
 
@@ -79,7 +79,12 @@ export default function CitySearch() {
               <Loader2 className="h-4 w-4 animate-spin" /> Buscando…
             </div>
           )}
-          {searching && !isFetching && <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>}
+          {searching && !isFetching && error && (
+            <p className="p-4 text-center text-sm text-destructive">
+              Não foi possível buscar agora: {error.message}
+            </p>
+          )}
+          {searching && !isFetching && !error && <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>}
 
           {searching && !!locations?.length && (
             <CommandGroup heading="Resultados">
